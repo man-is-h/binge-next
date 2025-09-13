@@ -1,4 +1,4 @@
-# Cross-Platform Movie Recommender
+# Binge Next
 
 This repository implements a full-stack project that:
 - Accepts a user's **Netflix viewing history CSV** upload.
