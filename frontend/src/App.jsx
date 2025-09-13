@@ -1,20 +1,25 @@
 import React, { useState } from 'react';
+import './App.css'; // Import the new CSS file
 
 function App() {
   const [file, setFile] = useState(null);
-  const [topK, setTopK] = useState(5); // Add state for top_k
+  const [topK, setTopK] = useState(5);
   const [recommendations, setRecommendations] = useState([]);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [fileName, setFileName] = useState('');
 
   const handleFileChange = (event) => {
-    setFile(event.target.files[0]);
-    setRecommendations([]);
-    setError('');
+    const selectedFile = event.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      setFileName(selectedFile.name);
+      setRecommendations([]);
+      setError('');
+    }
   };
 
   const handleTopKChange = (event) => {
-    // Ensure the value is within the allowed range (1-20)
     const value = Math.max(1, Math.min(20, Number(event.target.value)));
     setTopK(value);
   };
@@ -28,12 +33,12 @@ function App() {
 
     setIsLoading(true);
     setError('');
+    setRecommendations([]);
 
     const formData = new FormData();
     formData.append('file', file);
 
     try {
-      // Construct the URL dynamically with the topK value from state
       const response = await fetch(`http://localhost:8000/recommend?top_k=${topK}`, {
         method: 'POST',
         body: formData,
@@ -41,7 +46,7 @@ function App() {
 
       if (!response.ok) {
         const errData = await response.json();
-        throw new Error(errData.detail || 'Something went wrong');
+        throw new Error(errData.detail || 'Failed to get recommendations.');
       }
       
       const data = await response.json();
@@ -54,13 +59,23 @@ function App() {
   };
 
   return (
-    <div style={{ fontFamily: 'sans-serif', maxWidth: '600px', margin: 'auto', padding: '20px' }}>
-      <h1>Movie Recommender</h1>
-      <p>Upload your viewing history file (e.g., NetflixViewingHistory.csv) to get recommendations.</p>
+    <div className="app-container">
+      <header className="app-header">
+        <h1>Movie Recommender</h1>
+        <p>Upload your Netflix viewing history to get personalized movie recommendations.</p>
+      </header>
       
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '10px' }}>
-          <label htmlFor="topKInput">Number of Recommendations (1-20): </label>
+      <form onSubmit={handleSubmit} className="upload-form">
+        <div className="form-group">
+          <label htmlFor="file-upload">Upload History File (.csv)</label>
+          <input id="file-upload" type="file" onChange={handleFileChange} accept=".csv" style={{display: 'none'}} />
+          <button type="button" onClick={() => document.getElementById('file-upload').click()} style={{width: '100%', padding: '10px', border: '1px dashed #ccc', borderRadius: '4px'}}>
+            {fileName || 'Choose a file...'}
+          </button>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="topKInput">Number of Recommendations</label>
           <input
             id="topKInput"
             type="number"
@@ -70,23 +85,24 @@ function App() {
             max="20"
           />
         </div>
-        <div style={{ marginBottom: '10px' }}>
-          <input type="file" onChange={handleFileChange} accept=".csv" />
-        </div>
-        <button type="submit" disabled={isLoading}>
-          {isLoading ? 'Getting Recommendations...' : 'Get Recommendations'}
+        
+        <button type="submit" className="submit-btn" disabled={isLoading || !file}>
+          Get Recommendations
         </button>
       </form>
 
-      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+      {isLoading && <div className="loading-spinner"></div>}
+      {error && <p className="error-message">{error}</p>}
 
       {recommendations.length > 0 && (
-        <div>
-          <h2>Your Top {topK} Recommendations:</h2>
-          <ul style={{ listStyleType: 'none', padding: 0 }}>
+        <div className="recommendations-container">
+          <h2>Your Top {topK} Recommendations</h2>
+          <ul className="recommendations-list">
             {recommendations.map((rec, index) => (
-              <li key={index} style={{ border: '1px solid #ccc', padding: '10px', margin: '5px 0', borderRadius: '5px' }}>
-                <strong>{rec.title}</strong> ({rec.genre}) - Directed By <em>{rec.director}</em>
+              <li key={index} className="recommendation-card">
+                <strong>{rec.title}</strong>
+                <span className="director"> ({rec.director})</span>
+                <em className="genre">{rec.genre}</em>
               </li>
             ))}
           </ul>
