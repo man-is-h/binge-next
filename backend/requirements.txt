@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+python-multipart
+pandas
+scikit-learn
+sentence-transformers
+requests
+cachetools
+httpx
+gunicorn
