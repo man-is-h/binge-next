@@ -61,8 +61,8 @@ function App() {
   return (
     <div className="app-container">
       <header className="app-header">
-        <h1>Movie Recommender</h1>
-        <p>Upload your Netflix viewing history to get personalized movie recommendations.</p>
+        <h1>Binge Next</h1>
+        <p>Upload your Netflix viewing history to get personalized recommendations.</p>
       </header>
       
       <form onSubmit={handleSubmit} className="upload-form">
